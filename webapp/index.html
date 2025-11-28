@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"="width=device-width, initial-scale=1.0">
+    <title>Claude Admin // Cyberpunk Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-color: #050505;
+            --panel-bg: rgba(20, 20, 20, 0.9);
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff00ff;
+            --text-color: #e0e0e0;
+            --terminal-green: #0aff0a;
+        }
+
+        * {
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-cyan) var(--bg-color);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            background-image:
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Scanline Animation */
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* Container */
+        .cyber-container {
+            width: 100%;
+            max-width: 900px;
+            height: 95vh;
+            background: var(--panel-bg);
+            border: 1px solid var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header */
+        .header {
+            padding: 20px;
+            border-bottom: 2px solid var(--neon-pink);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .header h1 {
+            font-family: 'Orbitron', sans-serif;
+            margin: 0;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+        }
+
+        .status {
+            font-size: 0.8rem;
+            color: var(--terminal-green);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--terminal-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--terminal-green);
+            animation: blink 2s infinite;
+        }
+
+        .status-dot.offline {
+            background: #ff0000;
+            box-shadow: 0 0 10px #ff0000;
+        }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Messages */
+        .message {
+            max-width: 80%;
+            padding: 15px;
+            position: relative;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            border-left: 3px solid var(--neon-cyan);
+            background: rgba(0, 243, 255, 0.05);
+            color: #fff;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            border-right: 3px solid var(--neon-pink);
+            background: rgba(255, 0, 255, 0.05);
+            text-align: right;
+        }
+
+        .message.system {
+            align-self: center;
+            border: 1px solid #555;
+            background: rgba(100, 100, 100, 0.1);
+            color: #999;
+            font-size: 0.85rem;
+            max-width: 60%;
+            text-align: center;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* Code Snippet Styling */
+        .code-block {
+            background: #000;
+            border: 1px solid #333;
+            margin-top: 10px;
+            padding: 10px;
+            padding-top: 30px;
+            border-radius: 4px;
+            position: relative;
+            text-align: left;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--terminal-green);
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--neon-cyan);
+            color: #000;
+            border: none;
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        .copy-btn:hover {
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid var(--neon-cyan);
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-cyan);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .input-field {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #333;
+            color: white;
+            padding: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-field:focus {
+            border-color: var(--neon-pink);
+        }
+
+        .input-field:disabled {
+            opacity: 0.5;
+        }
+
+        /* Animations */
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--neon-cyan);
+        }
+
+        /* File Upload Hidden Input */
+        #file-input { display: none; }
+        #img-input { display: none; }
+
+        /* Image preview */
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 10px;
+            border: 1px solid var(--neon-cyan);
+            border-radius: 4px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="cyber-container">
+        <div class="header">
+            <h1>CLAUDE_ADMIN // TERMINAL_V2</h1>
+            <div class="status">
+                <div class="status-dot" id="status-dot"></div>
+                <span id="status-text">CONNECTING...</span>
+            </div>
+        </div>
+
+        <div class="chat-area" id="chat-area">
+            <div class="message system">
+                <div class="text">Инициализация соединения с сервером...</div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="file" id="file-input">
+            <input type="file" id="img-input" accept="image/*">
+
+            <button class="action-btn" id="file-btn" onclick="document.getElementById('file-input').click()" title="Отправить файл" disabled>
+                <i class="fas fa-file-code"></i>
+            </button>
+            <button class="action-btn" id="img-btn" onclick="document.getElementById('img-input').click()" title="Отправить фото" disabled>
+                <i class="fas fa-camera"></i>
+            </button>
+
+            <input type="text" class="input-field" id="message-input" placeholder="Подключение..." autocomplete="off" disabled>
+
+            <button class="action-btn" id="send-btn" style="border-color: var(--terminal-green); color: var(--terminal-green)" disabled>
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let reconnectTimer = null;
+
+        const chatArea = document.getElementById('chat-area');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const fileBtn = document.getElementById('file-btn');
+        const imgBtn = document.getElementById('img-btn');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const fileInput = document.getElementById('file-input');
+        const imgInput = document.getElementById('img-input');
+
+        // WebSocket подключение
+        function connect() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+                statusDot.classList.remove('offline');
+                statusText.textContent = 'SYSTEM ONLINE';
+                messageInput.disabled = false;
+                messageInput.placeholder = 'Введите команду...';
+                sendBtn.disabled = false;
+                fileBtn.disabled = false;
+                imgBtn.disabled = false;
+
+                // Очищаем предыдущие системные сообщения
+                chatArea.innerHTML = '';
+                addSystemMessage('Связь установлена. Жду указаний, оператор.');
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleBotMessage(data);
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket disconnected');
+                statusDot.classList.add('offline');
+                statusText.textContent = 'OFFLINE';
+                messageInput.disabled = true;
+                messageInput.placeholder = 'Соединение потеряно...';
+                sendBtn.disabled = true;
+                fileBtn.disabled = true;
+                imgBtn.disabled = true;
+
+                addSystemMessage('Соединение потеряно. Переподключение через 3 сек...');
+
+                // Автоматическое переподключение через 3 секунды
+                reconnectTimer = setTimeout(connect, 3000);
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+        }
+
+        // Отправка текстового сообщения
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (text === '' || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+            // Рендер сообщения пользователя
+            appendMessage(text, 'user');
+            messageInput.value = '';
+
+            // Отправка через WebSocket
+            ws.send(JSON.stringify({
+                type: 'text',
+                content: text
+            }));
+        }
+
+        // Добавление сообщения в DOM
+        function appendMessage(text, sender, hasImage = false, imageUrl = null) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', sender);
+
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('text');
+            contentDiv.textContent = text;
+
+            msgDiv.appendChild(contentDiv);
+
+            // Если есть изображение
+            if (hasImage && imageUrl) {
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.classList.add('image-preview');
+                msgDiv.appendChild(img);
+            }
+
+            const timeSpan = document.createElement('span');
+            timeSpan.classList.add('message-time');
+            const now = new Date();
+            timeSpan.textContent = formatTime(now);
+
+            msgDiv.appendChild(timeSpan);
+            chatArea.appendChild(msgDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // Системное сообщение
+        function addSystemMessage(text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', 'system');
+
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('text');
+            contentDiv.textContent = text;
+
+            msgDiv.appendChild(contentDiv);
+            chatArea.appendChild(msgDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // Обработка сообщения от бота
+        function handleBotMessage(data) {
+            if (data.type === 'status') {
+                // Обновление статуса (например, "Обрабатываю... 30с")
+                addSystemMessage(data.content);
+            } else if (data.type === 'response') {
+                // Обычный текстовый ответ
+                if (data.has_code && data.code_snippet) {
+                    appendBotResponse(data.content, data.code_snippet);
+                } else {
+                    appendMessage(data.content, 'bot');
+                }
+            }
+        }
+
+        // Ответ бота с блоком кода
+        function appendBotResponse(text, command) {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', 'bot');
+
+            let htmlContent = `<div class="text">${escapeHtml(text)}</div>`;
+
+            // Если есть команда, добавляем блок кода
+            if (command) {
+                const escapedCommand = escapeHtml(command);
+                const safeCommand = command.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+                htmlContent += `
+                    <div class="code-block">
+                        <code>${escapedCommand}</code>
+                        <button class="copy-btn" onclick="copyCode(this, \`${safeCommand}\`)">COPY</button>
+                    </div>
+                `;
+            }
+
+            const now = new Date();
+            htmlContent += `<span class="message-time">${formatTime(now)}</span>`;
+
+            msgDiv.innerHTML = htmlContent;
+            chatArea.appendChild(msgDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // Копирование кода
+        function copyCode(btn, code) {
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = "COPIED!";
+                btn.style.background = "var(--terminal-green)";
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.background = "var(--neon-cyan)";
+                }, 2000);
+            });
+        }
+
+        // Форматирование времени
+        function formatTime(date) {
+            const h = date.getHours();
+            const m = date.getMinutes();
+            return `${h}:${m < 10 ? '0' : ''}${m}`;
+        }
+
+        // Экранирование HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Обработка загрузки файлов
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const base64 = event.target.result.split(',')[1];
+
+                appendMessage(`📄 ${file.name}`, 'user');
+
+                ws.send(JSON.stringify({
+                    type: 'file',
+                    filename: file.name,
+                    content: base64
+                }));
+            };
+            reader.readAsDataURL(file);
+            fileInput.value = '';
+        });
+
+        // Обработка загрузки изображений
+        imgInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const base64 = event.target.result.split(',')[1];
+                const dataUrl = event.target.result;
+
+                appendMessage(`📷 ${file.name}`, 'user', true, dataUrl);
+
+                ws.send(JSON.stringify({
+                    type: 'image',
+                    filename: file.name,
+                    content: base64
+                }));
+            };
+            reader.readAsDataURL(file);
+            imgInput.value = '';
+        });
+
+        // Event listeners
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Инициализация подключения
+        connect();
+    </script>
+</body>
+</html>
