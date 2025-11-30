@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"="width=device-width, initial-scale=1.0">
     <title>Claude Admin // Cyberpunk Terminal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -260,30 +263,52 @@
 
         /* Animations */
         @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
+
         ::-webkit-scrollbar-track {
             background: #000;
         }
+
         ::-webkit-scrollbar-thumb {
             background: var(--neon-cyan);
         }
 
         /* File Upload Hidden Input */
-        #file-input { display: none; }
-        #img-input { display: none; }
+        #file-input {
+            display: none;
+        }
+
+        #img-input {
+            display: none;
+        }
 
         /* Image preview */
         .image-preview {
@@ -294,188 +319,251 @@
             border-radius: 4px;
         }
 
-    </style>
-</head>
-<body>
-
-    <div class="cyber-container">
-        <div class="header">
-            <h1>CLAUDE_ADMIN // TERMINAL_V2</h1>
-            <div class="status">
-                <div class="status-dot" id="status-dot"></div>
-                <span id="status-text">CONNECTING...</span>
-            </div>
-        </div>
-
-        <div class="chat-area" id="chat-area">
-            <div class="message system">
-                <div class="text">Инициализация соединения с сервером...</div>
-            </div>
-        </div>
-
-        <div class="input-area">
-            <input type="file" id="file-input">
-            <input type="file" id="img-input" accept="image/*">
-
-            <button class="action-btn" id="file-btn" onclick="document.getElementById('file-input').click()" title="Отправить файл" disabled>
-                <i class="fas fa-file-code"></i>
-            </button>
-            <button class="action-btn" id="img-btn" onclick="document.getElementById('img-input').click()" title="Отправить фото" disabled>
-                <i class="fas fa-camera"></i>
-            </button>
-
-            <input type="text" class="input-field" id="message-input" placeholder="Подключение..." autocomplete="off" disabled>
-
-            <button class="action-btn" id="send-btn" style="border-color: var(--terminal-green); color: var(--terminal-green)" disabled>
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </div>
-    </div>
-
-    <script src="auth.js"></script>
-    <script>
-        // Проверка аутентификации при загрузке
-        (async function checkAuthOnLoad() {
-            const auth = new BiometricAuth();
-            const status = await auth.checkAuth();
-            
-            if (!status.authenticated) {
-                // Не авторизован - перенаправляем на страницу входа
-                window.location.href = '/login';
-                return;
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            .cyber-container {
+                height: 100vh;
+                border: none;
+                max-width: 100%;
             }
-        })();
 
-        let ws = null;
-        let reconnectTimer = null;
+            .header h1 {
+                font-size: 1.1rem;
+            }
 
-        const chatArea = document.getElementById('chat-area');
-        const messageInput = document.getElementById('message-input');
-        const sendBtn = document.getElementById('send-btn');
-        const fileBtn = document.getElementById('file-btn');
-        const imgBtn = document.getElementById('img-btn');
-        const statusDot = document.getElementById('status-dot');
-        const statusText = document.getElementById('status-text');
-        const fileInput = document.getElementById('file-input');
-        const imgInput = document.getElementById('img-input');
+            .message {
+                max-width: 90%;
+                font-size: 1rem;
+            }
+
+            .input-area {
+                padding: 10px;
+                gap: 10px;
+            }
+
+            .action-btn {
+                width: 45px;
+                height: 45px;
+            }
+
+            .input-field {
+                font-size: 1.1rem;
+                /* Prevent zoom on iOS */
+            }
+        }
+
+        /* Improved System Message */
+        .message.system {
+            align-self: center;
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            background: rgba(0, 20, 20, 0.8);
+            color: var(--neon-cyan);
+            font-size: 0.75rem;
+            max-width: 80%;
+            text-align: center;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin: 10px 0;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
+            animation: slideIn 0.5s ease, fadeOut 0.5s ease 4s forwards;
+            /* Auto fade out */
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+                height: 0;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+        }
+
+        /* Glitch Effect for Header */
+
+        100% {
+            transform: translate(0)
+        }
+        }
+
+        </head><body><div class="cyber-container"><div class="header"><h1>CLAUDE_ADMIN // TERMINAL_V2</h1>
+        <div class="status"><div class="status-dot" id="status-dot"></div><span id="status-text">CONNECTING...</span></div></div><div class="chat-area" id="chat-area"><div class="message system"><div class="text">Инициализация соединения с сервером...</div></div></div><div class="input-area"><input type="file" id="file-input"><input type="file" id="img-input" accept="image/*"><button class="action-btn" id="file-btn" onclick="document.getElementById('file-input').click()" title="Отправить файл" disabled><i class="fas fa-file-code"></i></button><button class="action-btn" id="img-btn" onclick="document.getElementById('img-input').click()" title="Отправить фото" disabled><i class="fas fa-camera"></i></button><input type="text" class="input-field" id="message-input" placeholder="Подключение..." autocomplete="off" disabled><button class="action-btn" id="send-btn" style="border-color: var(--terminal-green); color: var(--terminal-green)" disabled><i class="fas fa-paper-plane"></i></button></div></div><script src="auth.js"></script><script> // Проверка аутентификации при загрузке
+
+        (async function checkAuthOnLoad() {
+                const auth=new BiometricAuth();
+                const status=await auth.checkAuth();
+
+                if ( !status.authenticated) {
+                    // Не авторизован - перенаправляем на страницу входа
+                    window.location.href='/login';
+                    return;
+                }
+            })();
+
+        let ws=null;
+        let reconnectTimer=null;
+
+        const chatArea=document.getElementById('chat-area');
+        const messageInput=document.getElementById('message-input');
+        const sendBtn=document.getElementById('send-btn');
+        const fileBtn=document.getElementById('file-btn');
+        const imgBtn=document.getElementById('img-btn');
+        const statusDot=document.getElementById('status-dot');
+        const statusText=document.getElementById('status-text');
+        const fileInput=document.getElementById('file-input');
+        const imgInput=document.getElementById('img-input');
 
         // WebSocket подключение
         function connect() {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.host}/ws`;
+            const protocol=window.location.protocol==='https:' ? 'wss:': 'ws:';
 
-            ws = new WebSocket(wsUrl);
+            const wsUrl=`$ {
+                protocol
+            }
 
-            ws.onopen = () => {
+            //${window.location.host}/ws`;
+
+            ws=new WebSocket(wsUrl);
+
+            ws.onopen=()=> {
                 console.log('WebSocket connected');
                 statusDot.classList.remove('offline');
-                statusText.textContent = 'SYSTEM ONLINE';
-                messageInput.disabled = false;
-                messageInput.placeholder = 'Введите команду...';
-                sendBtn.disabled = false;
-                fileBtn.disabled = false;
-                imgBtn.disabled = false;
+                statusText.textContent='SYSTEM ONLINE';
+                messageInput.disabled=false;
+                messageInput.placeholder='Введите команду...';
+                sendBtn.disabled=false;
+                fileBtn.disabled=false;
+                imgBtn.disabled=false;
 
                 // Очищаем предыдущие системные сообщения
-                chatArea.innerHTML = '';
+                chatArea.innerHTML='';
                 addSystemMessage('Связь установлена. Жду указаний, оператор.');
-            };
+            }
 
-            ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
+            ;
+
+            ws.onmessage=(event)=> {
+                const data=JSON.parse(event.data);
                 handleBotMessage(data);
-            };
+            }
 
-            ws.onclose = () => {
+            ;
+
+            ws.onclose=()=> {
                 console.log('WebSocket disconnected');
                 statusDot.classList.add('offline');
-                statusText.textContent = 'OFFLINE';
-                messageInput.disabled = true;
-                messageInput.placeholder = 'Соединение потеряно...';
-                sendBtn.disabled = true;
-                fileBtn.disabled = true;
-                imgBtn.disabled = true;
+                statusText.textContent='OFFLINE';
+                messageInput.disabled=true;
+                messageInput.placeholder='Соединение потеряно...';
+                sendBtn.disabled=true;
+                fileBtn.disabled=true;
+                imgBtn.disabled=true;
 
                 addSystemMessage('Соединение потеряно. Переподключение через 3 сек...');
 
                 // Автоматическое переподключение через 3 секунды
-                reconnectTimer = setTimeout(connect, 3000);
-            };
+                reconnectTimer=setTimeout(connect, 3000);
+            }
 
-            ws.onerror = (error) => {
+            ;
+
+            ws.onerror=(error)=> {
                 console.error('WebSocket error:', error);
-            };
+            }
+
+            ;
         }
 
         // Отправка текстового сообщения
         function sendMessage() {
-            const text = messageInput.value.trim();
-            if (text === '' || !ws || ws.readyState !== WebSocket.OPEN) return;
+            const text=messageInput.value.trim();
+            if (text==='' || !ws || ws.readyState !==WebSocket.OPEN) return;
 
             // Рендер сообщения пользователя
             appendMessage(text, 'user');
-            messageInput.value = '';
+            messageInput.value='';
 
             // Отправка через WebSocket
             ws.send(JSON.stringify({
-                type: 'text',
-                content: text
-            }));
+                    type: 'text',
+                    content: text
+                }));
         }
 
         // Добавление сообщения в DOM
-        function appendMessage(text, sender, hasImage = false, imageUrl = null) {
-            const msgDiv = document.createElement('div');
+        function appendMessage(text, sender, hasImage=false, imageUrl=null) {
+            const msgDiv=document.createElement('div');
             msgDiv.classList.add('message', sender);
 
-            const contentDiv = document.createElement('div');
+            const contentDiv=document.createElement('div');
             contentDiv.classList.add('text');
-            contentDiv.textContent = text;
+            contentDiv.textContent=text;
 
             msgDiv.appendChild(contentDiv);
 
             // Если есть изображение
             if (hasImage && imageUrl) {
-                const img = document.createElement('img');
-                img.src = imageUrl;
+                const img=document.createElement('img');
+                img.src=imageUrl;
                 img.classList.add('image-preview');
                 msgDiv.appendChild(img);
             }
 
-            const timeSpan = document.createElement('span');
+            const timeSpan=document.createElement('span');
             timeSpan.classList.add('message-time');
-            const now = new Date();
-            timeSpan.textContent = formatTime(now);
+            const now=new Date();
+            timeSpan.textContent=formatTime(now);
 
             msgDiv.appendChild(timeSpan);
             chatArea.appendChild(msgDiv);
-            chatArea.scrollTop = chatArea.scrollHeight;
+            chatArea.scrollTop=chatArea.scrollHeight;
         }
 
         // Системное сообщение
         function addSystemMessage(text) {
-            const msgDiv = document.createElement('div');
+            const msgDiv=document.createElement('div');
             msgDiv.classList.add('message', 'system');
 
-            const contentDiv = document.createElement('div');
+            const contentDiv=document.createElement('div');
             contentDiv.classList.add('text');
-            contentDiv.textContent = text;
+            contentDiv.textContent=text;
 
             msgDiv.appendChild(contentDiv);
             chatArea.appendChild(msgDiv);
-            chatArea.scrollTop = chatArea.scrollHeight;
+            chatArea.scrollTop=chatArea.scrollHeight;
         }
 
         // Обработка сообщения от бота
         function handleBotMessage(data) {
-            if (data.type === 'status') {
+            if (data.type==='status') {
                 // Обновление статуса (например, "Обрабатываю... 30с")
                 addSystemMessage(data.content);
-            } else if (data.type === 'response') {
+            }
+
+            else if (data.type==='response') {
+
                 // Обычный текстовый ответ
                 if (data.has_code && data.code_snippet) {
                     appendBotResponse(data.content, data.code_snippet);
-                } else {
+                }
+
+                else {
                     appendMessage(data.content, 'bot');
                 }
             }
@@ -483,109 +571,147 @@
 
         // Ответ бота с блоком кода
         function appendBotResponse(text, command) {
-            const msgDiv = document.createElement('div');
+            const msgDiv=document.createElement('div');
             msgDiv.classList.add('message', 'bot');
 
-            let htmlContent = `<div class="text">${escapeHtml(text)}</div>`;
+            let htmlContent=`<div class="text">$ {
+                escapeHtml(text)
+            }
+
+            </div>`;
 
             // Если есть команда, добавляем блок кода
             if (command) {
-                const escapedCommand = escapeHtml(command);
-                const safeCommand = command.replace(/`/g, '\\`').replace(/\$/g, '\\$');
-                htmlContent += `
-                    <div class="code-block">
-                        <code>${escapedCommand}</code>
-                        <button class="copy-btn" onclick="copyCode(this, \`${safeCommand}\`)">COPY</button>
-                    </div>
-                `;
+                const escapedCommand=escapeHtml(command);
+                const safeCommand=command.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+
+                htmlContent+=` <div class="code-block"><code>$ {
+                    escapedCommand
+                }
+
+                </code><button class="copy-btn" onclick="copyCode(this, \`${safeCommand}\`)">COPY</button></div>`;
             }
 
-            const now = new Date();
-            htmlContent += `<span class="message-time">${formatTime(now)}</span>`;
+            const now=new Date();
 
-            msgDiv.innerHTML = htmlContent;
+            htmlContent+=`<span class="message-time">$ {
+                formatTime(now)
+            }
+
+            </span>`;
+
+            msgDiv.innerHTML=htmlContent;
             chatArea.appendChild(msgDiv);
-            chatArea.scrollTop = chatArea.scrollHeight;
+            chatArea.scrollTop=chatArea.scrollHeight;
         }
 
         // Копирование кода
         function copyCode(btn, code) {
-            navigator.clipboard.writeText(code).then(() => {
-                const originalText = btn.innerText;
-                btn.innerText = "COPIED!";
-                btn.style.background = "var(--terminal-green)";
-                setTimeout(() => {
-                    btn.innerText = originalText;
-                    btn.style.background = "var(--neon-cyan)";
-                }, 2000);
-            });
+            navigator.clipboard.writeText(code).then(()=> {
+                    const originalText=btn.innerText;
+                    btn.innerText="COPIED!";
+                    btn.style.background="var(--terminal-green)";
+
+                    setTimeout(()=> {
+                            btn.innerText=originalText;
+                            btn.style.background="var(--neon-cyan)";
+                        }
+
+                        , 2000);
+                });
         }
 
         // Форматирование времени
         function formatTime(date) {
-            const h = date.getHours();
-            const m = date.getMinutes();
-            return `${h}:${m < 10 ? '0' : ''}${m}`;
+            const h=date.getHours();
+            const m=date.getMinutes();
+
+            return `$ {
+                h
+            }
+
+            :$ {
+                m < 10 ? '0': ''
+            }
+
+            $ {
+                m
+            }
+
+            `;
         }
 
         // Экранирование HTML
         function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
+            const div=document.createElement('div');
+            div.textContent=text;
             return div.innerHTML;
         }
 
         // Обработка загрузки файлов
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+        fileInput.addEventListener('change', (e)=> {
+                const file=e.target.files[0];
+                if ( !file) return;
 
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const base64 = event.target.result.split(',')[1];
+                const reader=new FileReader();
 
-                appendMessage(`📄 ${file.name}`, 'user');
+                reader.onload=(event)=> {
+                    const base64=event.target.result.split(',')[1];
 
-                ws.send(JSON.stringify({
-                    type: 'file',
-                    filename: file.name,
-                    content: base64
-                }));
-            };
+                    appendMessage(`📄 $ {
+                            file.name
+                        }
+
+                        `, 'user');
+
+                    ws.send(JSON.stringify({
+                            type: 'file',
+                            filename: file.name,
+                            content: base64
+                        }));
+            }
+
+            ;
             reader.readAsDataURL(file);
-            fileInput.value = '';
+            fileInput.value='';
         });
 
         // Обработка загрузки изображений
-        imgInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+        imgInput.addEventListener('change', (e)=> {
+                const file=e.target.files[0];
+                if ( !file) return;
 
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const base64 = event.target.result.split(',')[1];
-                const dataUrl = event.target.result;
+                const reader=new FileReader();
 
-                appendMessage(`📷 ${file.name}`, 'user', true, dataUrl);
+                reader.onload=(event)=> {
+                    const base64=event.target.result.split(',')[1];
+                    const dataUrl=event.target.result;
 
-                ws.send(JSON.stringify({
-                    type: 'image',
-                    filename: file.name,
-                    content: base64
-                }));
-            };
+                    appendMessage(`📷 $ {
+                            file.name
+                        }
+
+                        `, 'user', true, dataUrl);
+
+                    ws.send(JSON.stringify({
+                            type: 'image',
+                            filename: file.name,
+                            content: base64
+                        }));
+            }
+
+            ;
             reader.readAsDataURL(file);
-            imgInput.value = '';
+            imgInput.value='';
         });
 
         // Event listeners
         sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
+
+        messageInput.addEventListener('keypress', (e)=> {
+                if (e.key==='Enter') sendMessage();
+            });
 
         // Инициализация подключения
         connect();
-    </script>
-</body>
-</html>
+        </script></body></html>
