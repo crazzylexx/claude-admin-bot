@@ -26,17 +26,21 @@ from webauthn.helpers.structs import (
 from webauthn.helpers.cose import COSEAlgorithmIdentifier
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Настройки
 DB_PATH = Path(__file__).parent / "users.db"
-SECRET_KEY = secrets.token_urlsafe(32)  # Генерируем случайный ключ
+SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(32))
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 24
 
 # RP (Relying Party) настройки
-RP_ID = "localhost"  # Для продакшена замените на ваш домен
-RP_NAME = "Claude Admin Bot"
-ORIGIN = "http://localhost:8005"  # Для продакшена замените на https://ваш-домен
+RP_ID = os.getenv("RP_ID", "localhost")
+RP_NAME = os.getenv("RP_NAME", "Claude Admin Bot")
+ORIGIN = os.getenv("ORIGIN", "http://localhost:8005")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
