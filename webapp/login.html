@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Claude Admin // Login</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
             --bg-dark: #0a0a0f;
@@ -48,8 +51,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .logo {
@@ -63,8 +73,15 @@
         }
 
         @keyframes glowPulse {
-            0%, 100% { text-shadow: 0 0 20px var(--neon-cyan); }
-            50% { text-shadow: 0 0 30px var(--neon-cyan), 0 0 40px var(--neon-cyan); }
+
+            0%,
+            100% {
+                text-shadow: 0 0 20px var(--neon-cyan);
+            }
+
+            50% {
+                text-shadow: 0 0 30px var(--neon-cyan), 0 0 40px var(--neon-cyan);
+            }
         }
 
         .subtitle {
@@ -157,9 +174,19 @@
         }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
         }
 
         .info-message {
@@ -193,19 +220,27 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
-        #login-screen, #register-screen {
+        #login-screen,
+        #register-screen {
             display: none;
         }
 
-        #login-screen.active, #register-screen.active {
+        #login-screen.active,
+        #register-screen.active {
             display: block;
         }
     </style>
 </head>
+
 <body>
     <div class="auth-container">
         <!-- Экран регистрации -->
@@ -265,7 +300,7 @@
         </div>
     </div>
 
-    <script src="auth.js"></script>
+    <script src="/static/auth.js"></script>
     <script>
         const auth = new BiometricAuth();
 
@@ -373,4 +408,5 @@
         init();
     </script>
 </body>
+
 </html>
