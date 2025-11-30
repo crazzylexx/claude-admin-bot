@@ -332,7 +332,20 @@
         </div>
     </div>
 
+    <script src="auth.js"></script>
     <script>
+        // Проверка аутентификации при загрузке
+        (async function checkAuthOnLoad() {
+            const auth = new BiometricAuth();
+            const status = await auth.checkAuth();
+            
+            if (!status.authenticated) {
+                // Не авторизован - перенаправляем на страницу входа
+                window.location.href = '/login';
+                return;
+            }
+        })();
+
         let ws = null;
         let reconnectTimer = null;
 

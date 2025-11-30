@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Admin // Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff00ff;
+            --neon-green: #39ff14;
+            --text-primary: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg-dark);
+            background-image:
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .auth-container {
+            max-width: 450px;
+            width: 90%;
+            background: rgba(20, 20, 30, 0.95);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 20px var(--neon-cyan);
+            text-align: center;
+            margin-bottom: 10px;
+            animation: glowPulse 2s infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { text-shadow: 0 0 20px var(--neon-cyan); }
+            50% { text-shadow: 0 0 30px var(--neon-cyan), 0 0 40px var(--neon-cyan); }
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #8e8ea0;
+            font-size: 0.9rem;
+            margin-bottom: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--neon-cyan);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(0, 243, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px 15px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            background: transparent;
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--neon-green);
+            color: #000;
+            box-shadow: 0 0 25px var(--neon-green);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn i {
+            font-size: 1.2rem;
+        }
+
+        .error-message {
+            background: rgba(255, 0, 85, 0.1);
+            border-left: 3px solid #ff0055;
+            padding: 12px;
+            margin-top: 20px;
+            border-radius: 4px;
+            color: #ff0055;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .info-message {
+            background: rgba(0, 243, 255, 0.1);
+            border-left: 3px solid var(--neon-cyan);
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: var(--neon-cyan);
+            font-size: 0.85rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid rgba(0, 243, 255, 0.1);
+            border-top: 3px solid var(--neon-cyan);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #login-screen, #register-screen {
+            display: none;
+        }
+
+        #login-screen.active, #register-screen.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Экран регистрации -->
+        <div id="register-screen">
+            <div class="logo">CLAUDE_ADMIN</div>
+            <div class="subtitle">Первый запуск // Регистрация</div>
+
+            <div class="info-message">
+                <i class="fas fa-fingerprint"></i> Для защиты доступа зарегистрируйте свой отпечаток пальца или Face ID
+            </div>
+
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="register-username">Имя пользователя</label>
+                    <input type="text" id="register-username" placeholder="admin" required>
+                </div>
+
+                <button type="submit" class="btn" id="register-btn">
+                    <i class="fas fa-fingerprint"></i>
+                    Зарегистрировать биометрию
+                </button>
+            </form>
+
+            <div class="error-message" id="register-error"></div>
+            <div class="loading" id="register-loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px; color: var(--neon-cyan);">Ожидание биометрии...</p>
+            </div>
+        </div>
+
+        <!-- Экран входа -->
+        <div id="login-screen">
+            <div class="logo">CLAUDE_ADMIN</div>
+            <div class="subtitle">Биометрическая аутентификация</div>
+
+            <div class="info-message">
+                <i class="fas fa-shield-alt"></i> Используйте отпечаток пальца или Face ID для входа
+            </div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Имя пользователя</label>
+                    <input type="text" id="login-username" placeholder="admin" required>
+                </div>
+
+                <button type="submit" class="btn" id="login-btn">
+                    <i class="fas fa-fingerprint"></i>
+                    Войти
+                </button>
+            </form>
+
+            <div class="error-message" id="login-error"></div>
+            <div class="loading" id="login-loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px; color: var(--neon-cyan);">Ожидание биометрии...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        const auth = new BiometricAuth();
+
+        const registerScreen = document.getElementById('register-screen');
+        const loginScreen = document.getElementById('login-screen');
+        const registerForm = document.getElementById('register-form');
+        const loginForm = document.getElementById('login-form');
+        const registerError = document.getElementById('register-error');
+        const loginError = document.getElementById('login-error');
+        const registerLoading = document.getElementById('register-loading');
+        const loginLoading = document.getElementById('login-loading');
+
+        // Проверка при загрузке страницы
+        async function init() {
+            // Проверка поддержки WebAuthn
+            if (!auth.isWebAuthnSupported()) {
+                showError(registerError, 'Ваш браузер не поддерживает биометрическую аутентификацию');
+                return;
+            }
+
+            // Проверка состояния аутентификации
+            const status = await auth.checkAuth();
+
+            if (status.authenticated) {
+                // Уже авторизован - перенаправляем на главную
+                window.location.href = '/';
+            } else if (status.needsRegistration) {
+                // Нужна регистрация
+                registerScreen.classList.add('active');
+            } else if (status.needsLogin) {
+                // Нужен вход
+                loginScreen.classList.add('active');
+            }
+        }
+
+        // Регистрация
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value.trim();
+
+            if (!username) {
+                showError(registerError, 'Введите имя пользователя');
+                return;
+            }
+
+            try {
+                hideError(registerError);
+                registerLoading.classList.add('show');
+                document.getElementById('register-btn').disabled = true;
+
+                await auth.register(username);
+
+                // Успешная регистрация - перенаправляем
+                window.location.href = '/';
+
+            } catch (error) {
+                console.error('Registration failed:', error);
+                showError(registerError, error.message || 'Ошибка регистрации');
+            } finally {
+                registerLoading.classList.remove('show');
+                document.getElementById('register-btn').disabled = false;
+            }
+        });
+
+        // Вход
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value.trim();
+
+            if (!username) {
+                showError(loginError, 'Введите имя пользователя');
+                return;
+            }
+
+            try {
+                hideError(loginError);
+                loginLoading.classList.add('show');
+                document.getElementById('login-btn').disabled = true;
+
+                await auth.login(username);
+
+                // Успешный вход - перенаправляем
+                window.location.href = '/';
+
+            } catch (error) {
+                console.error('Login failed:', error);
+                showError(loginError, error.message || 'Ошибка входа');
+            } finally {
+                loginLoading.classList.remove('show');
+                document.getElementById('login-btn').disabled = false;
+            }
+        });
+
+        // Утилиты
+        function showError(element, message) {
+            element.textContent = message;
+            element.classList.add('show');
+        }
+
+        function hideError(element) {
+            element.classList.remove('show');
+        }
+
+        // Инициализация
+        init();
+    </script>
+</body>
+</html>
