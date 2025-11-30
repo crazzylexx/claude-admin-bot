@@ -1,0 +1,20 @@
+[Unit]
+Description=Claude Admin Web API
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/claude-admin-bot
+Environment="PATH=/root/claude-admin-bot/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/root/claude-admin-bot/venv/bin/python api.py
+Restart=always
+RestartSec=10
+
+# Логирование
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=claude-api
+
+[Install]
+WantedBy=multi-user.target
